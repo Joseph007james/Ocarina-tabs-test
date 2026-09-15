@@ -341,17 +341,37 @@
       });
     }
 
+    // Corrige notas fuera del rango que la fuente/instrumento soportan
+    // (A4 a F6): sube o baja de a octavas completas manteniendo la misma
+    // nota (letra + accidental), hasta que caiga dentro del rango.
+    // Esto es necesario porque un lector de partituras (OMR) a veces
+    // detecta la octava incorrecta, y además el ocarina de 12 agujeros
+    // físicamente no puede tocar notas fuera de este rango de todos modos.
+    function bringNoteIntoRange(noteStr) {
+      const m = noteStr.match(/^([A-G])(#|B)?(\d+)$/);
+      if (!m) return noteStr;
+      const [, letter, acc, octaveStr] = m;
+      let octave = parseInt(octaveStr, 10);
+      const pc = LETTER_PC[letter] + (acc === '#' ? 1 : acc === 'B' ? -1 : 0);
+      let abs = octave * 12 + pc;
+      while (abs < MIN_ABS) { octave += 1; abs += 12; }
+      while (abs > MAX_ABS) { octave -= 1; abs -= 12; }
+      return `${letter}${acc || ''}${octave}`;
+    }
+
     // Parsea la nota e identifica la duración (ej: "D5:8" -> nota: "D5", dur: 8)
     function parseNoteToken(token) {
       const parts = token.trim().split(':');
       let noteStr = parts[0].toUpperCase();
       let durationVal = parts[1] ? parseFloat(parts[1]) : 4; // Por defecto 4 (Negra)
 
-      // Transposición de seguridad
-      noteStr = noteStr.replace(/([CDEFG])3/g, '$15');
-      noteStr = noteStr.replace(/([CDEFG])4/g, '$15');
-
       const isRest = noteStr === 'R' || noteStr === 'REST';
+
+      // Corrección de octava (no aplica a silencios)
+      if (!isRest) {
+        noteStr = bringNoteIntoRange(noteStr);
+      }
+
       const known = isRest || BASE_FONT_MAP.hasOwnProperty(noteStr);
       const glyph = isRest ? '𝄽' : (BASE_FONT_MAP[noteStr] || '?');
 
