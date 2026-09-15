@@ -179,11 +179,11 @@
 
     <div class="controls">
       <label>BPM: <input type="number" id="bpmInput" value="120" style="width: 60px;"></label>
-      <button onclick="renderTabs()">Actualizar Vista</button>
+      <button onclick="updateView()">Actualizar Vista</button>
       <button onclick="playPreview()">▶ Reproducir con Ritmo</button>
       <button class="secondary" onclick="copyInput()">Copiar texto</button>
       <label style="font-size: 13px; display:flex; align-items:center; gap:4px;">
-        <input type="checkbox" id="autoTransposeCheckbox" checked onchange="renderTabs()">
+        <input type="checkbox" id="autoTransposeCheckbox" checked onchange="updateView()">
         Evitar accidentales automáticamente
       </label>
       <span id="fontStatus" style="font-size: 12px; color: #999;"></span>
@@ -266,6 +266,18 @@
       const pc = ((abs % 12) + 12) % 12;
       const octave = Math.floor(abs / 12);
       return PITCH_NAMES_SHARP[pc] + octave;
+    }
+
+    // Punto de entrada usado por "Actualizar Vista", el checkbox de
+    // accidentales y al cargar un resultado del lector de partituras.
+    // Si el checkbox está tildado, aplica la transposición automática
+    // (que ya se encarga de redibujar); si no, solo redibuja.
+    function updateView() {
+      if (document.getElementById('autoTransposeCheckbox').checked) {
+        transposeToAvoidAccidentals();
+      } else {
+        renderTabs();
+      }
     }
 
     function transposeToAvoidAccidentals() {
@@ -746,7 +758,7 @@
       const result = document.getElementById('omrResult').value.trim();
       if (!result) return;
       document.getElementById('noteInput').value = result;
-      renderTabs();
+      updateView();
     }
 
     renderTabs();
