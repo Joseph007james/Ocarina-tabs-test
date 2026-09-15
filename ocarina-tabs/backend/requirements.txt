@@ -1,8 +1,0 @@
-# homr requiere Python 3.10, 3.11 o 3.12 (NO 3.13+).
-# El extra [cpu] instala la variante de PyTorch para CPU (sin GPU).
-# Si tenes GPU NVIDIA con CUDA 12.1, podes cambiarlo por homr[cuda]
-# (mucho mas rapido). Ver https://github.com/liebharc/homr#prerequisites
-flask>=3.0
-flask-cors>=4.0
-music21>=9.1
-homr[cpu]
